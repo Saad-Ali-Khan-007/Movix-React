@@ -10,13 +10,16 @@ import dayjs from "dayjs";
 import ContentWrapper from "../contentWrapper/ContentWrapper";
 import Img from "../lazyLoadImage/Img";
 import PosterFallback from "../../assets/no-poster.png";
-import CircleRating from "../circleRating/circleRating";
+import CircleRating from "../circleRating/CircleRating";
 import Genres from "../genres/Genres";
+
 import "./style.scss";
-const Carousel = ({ data, loading }) => {
+
+const Carousel = ({ data, loading, endpoint, title }) => {
   const carouselContainer = useRef();
   const { url } = useSelector((state) => state.home);
   const navigate = useNavigate();
+
   const navigation = (dir) => {
     const container = carouselContainer.current;
 
@@ -30,6 +33,7 @@ const Carousel = ({ data, loading }) => {
       behavior: "smooth",
     });
   };
+
   const skItem = () => {
     return (
       <div className="skeletonItem">
@@ -41,11 +45,11 @@ const Carousel = ({ data, loading }) => {
       </div>
     );
   };
-  console.log(url);
 
   return (
     <div className="carousel">
       <ContentWrapper>
+        {title && <div className="carouselTitle">{title}</div>}
         <BsFillArrowLeftCircleFill
           className="carouselLeftNav arrow"
           onClick={() => navigation("left")}
@@ -54,7 +58,6 @@ const Carousel = ({ data, loading }) => {
           className="carouselRightNav arrow"
           onClick={() => navigation("right")}
         />
-
         {!loading ? (
           <div className="carouselItems" ref={carouselContainer}>
             {data?.map((item) => {
@@ -63,9 +66,11 @@ const Carousel = ({ data, loading }) => {
                 : PosterFallback;
               return (
                 <div
-                  className="carouselItem"
-                  onClick={() => navigate(`/${item.media_type}/${item.id}`)}
                   key={item.id}
+                  className="carouselItem"
+                  onClick={() =>
+                    navigate(`/${item.media_type || endpoint}/${item.id}`)
+                  }
                 >
                   <div className="posterBlock">
                     <Img src={posterUrl} />
@@ -75,7 +80,9 @@ const Carousel = ({ data, loading }) => {
                   <div className="textBlock">
                     <span className="title">{item.title || item.name}</span>
                     <span className="date">
-                      {dayjs(item.release_Date).format("MMM D, YYYY")}
+                      {dayjs(item.release_date || item.first_air_date).format(
+                        "MMM D, YYYY"
+                      )}
                     </span>
                   </div>
                 </div>
@@ -84,7 +91,6 @@ const Carousel = ({ data, loading }) => {
           </div>
         ) : (
           <div className="loadingSkeleton">
-            {skItem()}
             {skItem()}
             {skItem()}
             {skItem()}
